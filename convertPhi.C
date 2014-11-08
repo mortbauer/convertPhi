@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                "rho" + p.name(),
+                p.name(),
                 runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                "rho" + phi.name(),
+                phi.name(),
                 runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
