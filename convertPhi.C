@@ -37,6 +37,7 @@ from: http://www.cfd-online.com/Forums/openfoam-solving/99346-quick-way-change-i
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("rhoRef", "scalar");
+    argList::validOptions.insert("poffset", "scalar");
 
     // Add explicit time option
     timeSelector::addOptions();
@@ -62,9 +63,26 @@ int main(int argc, char *argv[])
 
     Info<< "Reference density = " << rhoRef.value() << endl;
 
+    if (args.options().found("poffset")){
+        dimensionedScalar poffset
+        (
+            "poffset",
+            dimPressure
+            readScalar(IStringStream(args.options()["poffset"])())
+        );
+    }else{
+        dimensionedScalar poffset
+        (
+            "poffset",
+            dimPressure
+            0
+        );
+    }
+
+
 
 #   include "createTime.H"
-    // Optionally override controlDict time with -time options
+     // Optionally override controlDict time with -time options
     instantList times = timeSelector::selectIfPresent(runTime, args);
     if (times.size() < 1)
     {
@@ -104,13 +122,13 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                p.name(),
+                "rho" + p.name(),
                 runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            rhoRef*p
+            rhoRef*p+poffset
         );
 
         Info<< "Correcting kinematic pressure " << p.name()
@@ -151,7 +169,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                phi.name(),
+                "rho" + phi.name(),
                 runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
