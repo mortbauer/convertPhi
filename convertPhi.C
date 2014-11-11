@@ -63,23 +63,17 @@ int main(int argc, char *argv[])
 
     Info<< "Reference density = " << rhoRef.value() << endl;
 
-    if (args.options().found("poffset")){
-        dimensionedScalar poffset
-        (
-            "poffset",
-            dimPressure
-            readScalar(IStringStream(args.options()["poffset"])())
-        );
-    }else{
-        dimensionedScalar poffset
-        (
-            "poffset",
-            dimPressure
-            0
-        );
-    }
+    dimensionedScalar poffset
+    (
+        "poffset",
+        dimPressure,
+        args.options().found("poffset") 
+        ? readScalar(IStringStream(args.options()["poffset"])())
+        : 0
+    );
 
 
+    Info<< "pressure offset = " << poffset.value() << endl;
 
 #   include "createTime.H"
      // Optionally override controlDict time with -time options
