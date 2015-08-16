@@ -31,6 +31,7 @@ from: http://www.cfd-online.com/Forums/openfoam-solving/99346-quick-way-change-i
 
 #include "argList.H"
 #include "fvCFD.H"
+#include "fvIOoptionList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
