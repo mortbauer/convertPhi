@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
 {
     argList::validOptions.insert("rhoRef", "scalar");
     argList::validOptions.insert("poffset", "scalar");
+    argList::addBoolOption("inverse", "convert back to incompressible");
 
     // Add explicit time option
     timeSelector::addOptions();
@@ -105,11 +106,33 @@ int main(int argc, char *argv[])
         mesh
     );
 
-    if (p.dimensions() == dimPressure)
+    if ((p.dimensions() == dimPressure)&&(!args.options().found("inverse")))
     {
         Info<< "Pressure " << p.name() << " is a dynamic pressure.  "
             << "Nothing to do"
             << endl;
+    }
+    else if ((p.dimensions() == dimPressure)&&(args.options().found("inverse")))
+    {
+        volScalarField rhoP
+        (
+            IOobject
+            (
+                "rho" + p.name(),
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            (p-poffset)/rhoRef
+        );
+
+        Info<< "Correcting dynamic pressure " << p.name()
+            << " into kinematic pressure " << rhoP.name()
+            << endl;
+
+        rhoP.write();
+
     }
     else if (p.dimensions() == dimPressure/dimDensity)
     {
@@ -153,10 +176,31 @@ int main(int argc, char *argv[])
         mesh
     );
 
-    if (phi.dimensions() == dimMass/dimTime)
+    if ((phi.dimensions() == dimMass/dimTime)&&((!args.options().found("inverse"))))
     {
         Info<< "Flux " << phi.name() << " is a mass flux.  Nothing to do"
             << endl;
+    }
+    else if ((phi.dimensions() == dimMass/dimTime)&&((args.options().found("inverse"))))
+    {
+        surfaceScalarField rhoPhi
+        (
+            IOobject
+            (
+                "rho" + phi.name(),
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            phi/rhoRef
+        );
+
+        Info<< "Correcting mass flux " << phi.name()
+            << " into volume flux " << rhoPhi.name()
+            << endl;
+
+        rhoPhi.write();
     }
     else if (phi.dimensions() == dimVolume/dimTime)
     {
